@@ -44,7 +44,7 @@ export const dummyResources: Resource[] = [
   },
   {
     id: "6",
-    title: "出張旅費規程 A3-18 2023年7月",
+    title: "ＫＣレッド ＭＲ－２０",
     type: "ドキュメント",
     size: 114.64,
     createdAt: "2023-07-01",
@@ -52,7 +52,7 @@ export const dummyResources: Resource[] = [
   },
   {
     id: "7",
-    title: "A3-11 給与規程 2024年5月",
+    title: "ＫＣレッド ＭＲ－２０（ベニコウジ色素）",
     type: "ドキュメント",
     size: 306.88,
     createdAt: "2024-05-01",
