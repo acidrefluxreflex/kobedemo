@@ -7,3 +7,4 @@ export const openai = new OpenAI({
 
 // アシスタントIDを環境変数から取得
 export const ASSISTANT_ID = process.env.ASSISTANT_ID;
+export const ASSISTANT_ID_2 = process.env.ASSISTANT_ID_2;

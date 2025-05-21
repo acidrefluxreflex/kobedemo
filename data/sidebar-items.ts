@@ -2,6 +2,12 @@ import type { SidebarItem } from "@/types"
 
 export const sidebarItems: SidebarItem[] = [
   {
+    id: "freechat",
+    label: "チャット",
+    icon: "chat",
+    href: "/freechat",
+  },
+  {
     id: "resources",
     label: "リソース管理",
     icon: "resources",

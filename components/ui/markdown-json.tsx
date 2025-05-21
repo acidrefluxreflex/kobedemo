@@ -63,6 +63,23 @@ export function MarkdownJson({ data, className }: MarkdownJsonProps) {
                     ))}
                   </ul>
                 </div>
+
+                {/* 価格情報 */}
+                <div className="mb-3"> 
+                  <div className="text-xs uppercase text-slate-500 font-semibold mb-1">価格</div>
+                  {product.pricing_and_sales && product.pricing_and_sales.price ? (
+                    <ul className="list-disc list-inside text-sm">
+                      {Object.entries(product.pricing_and_sales.price).map(([priceType, priceValue], index) => (
+                        <li key={index}>
+                          <span className="font-medium">{priceType}:</span> {priceValue}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-slate-500">価格情報はありません</p>
+                  )}
+                </div>
+                  
                 
                 {/* マーケティング情報 */}
                 {Array.isArray(product.marketing_materials) && product.marketing_materials.length > 0 && (
@@ -93,7 +110,12 @@ export function MarkdownJson({ data, className }: MarkdownJsonProps) {
                       <span className="font-medium">出典:</span> {product.pricing_and_sales.source}
                     </div>
                     <div>
-                     
+                      {product.pricing_and_sales && product.pricing_and_sales.annual_sales_volume_kg ? (
+                        <span>
+                          <span className="font-medium">年間販売量: </span> 
+                          {product.pricing_and_sales.annual_sales_volume_kg.toLocaleString()}kg
+                        </span>
+                      ) : null}
                     </div>
                   </div>
                 </div>

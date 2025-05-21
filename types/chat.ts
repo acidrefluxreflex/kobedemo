@@ -1,9 +1,9 @@
-import { ProductQuestion } from './products';
+import { ProductQuestion } from "./products";
 
 // メッセージの型
 export interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   createdAt: Date;
 }
@@ -21,4 +21,5 @@ export interface ApiResponse {
   success: boolean;
   data?: any;
   error?: string;
+  fromCache?: boolean; // キャッシュからの応答を識別するためのフラグ
 }

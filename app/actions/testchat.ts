@@ -1,12 +1,17 @@
 "use server";
 
-import { openai, ASSISTANT_ID } from "../lib/openai";
+import { openai, ASSISTANT_ID_2 } from "../lib/openai";
 import { revalidatePath } from "next/cache";
-import { ProductQuestion } from "@/types/products";
 import { ApiResponse, Message } from "@/types/chat";
 
+// 自由チャット用のレスポンス型
+interface FreeChatResponse {
+  question: string;
+  answer: string;
+}
+
 // シンプルなインメモリキャッシュ（型安全な定義）
-const messageCache = new Map<string, ProductQuestion>();
+const messageCache = new Map<string, FreeChatResponse>();
 const CACHE_TTL = 60 * 60 * 1000; // 1時間（ミリ秒）
 const MAX_CACHE_SIZE = 100; // 最大キャッシュエントリ数
 
@@ -98,7 +103,7 @@ export async function sendMessage(message: string): Promise<ApiResponse> {
     
     if (threadId) {
       const run = await openai.beta.threads.runs.create(threadId, {
-        assistant_id: ASSISTANT_ID || "",  // nullやundefinedの場合は空文字列
+        assistant_id: ASSISTANT_ID_2 || "",  // nullやundefinedの場合は空文字列
       });
       
       // IDが確実に存在することを保証
@@ -213,88 +218,45 @@ export async function sendMessage(message: string): Promise<ApiResponse> {
       throw new Error("テキスト以外の応答です");
     }
 
-    // JSON形式の応答をパース
-    try {
-      // content.text.valueが確実に存在することを確認
-      const textValue = content.text.value || "";
-      console.log(`応答内容: ${textValue.substring(0, 200)}...`); // 最初の200文字をログ出力
-
-      const jsonMatch =
-        textValue.match(/```json\n([\s\S]*?)\n```/) ||
-        textValue.match(/\{[\s\S]*\}/);
-
-      if (jsonMatch) {
-        // matchの1番目があれば使用、なければ0番目を使用
-        const jsonStr = jsonMatch[1] || jsonMatch[0] || "{}";
-
-        // jsonStrが必ず文字列であることを確保
-        const jsonString = typeof jsonStr === "string" ? jsonStr : "{}";
-        console.log(`パース対象JSON文字列: ${jsonString.substring(0, 200)}...`); // 最初の200文字をログ出力
-
-        // 必ず文字列を渡すために同じjsonStringを使用
-        const responseData = JSON.parse(jsonString) as ProductQuestion;
-
-        // 完全な型安全を確保するためのデフォルト値設定
-        const safeResponseData: ProductQuestion = {
-          question:
-            typeof responseData.question === "string"
-              ? responseData.question
-              : "不明な質問",
-          answer: Array.isArray(responseData.answer) ? responseData.answer : [],
-        };
-
-        const question = safeResponseData.question;
-        const answerLength = safeResponseData.answer.length;
-
-        console.log(
-          `パース成功: Question=${question}, Answer長=${answerLength}`
-        );
-
-        // キャッシュに応答を保存
-        if (CACHE_ENABLED) {
-          try {
-            const cacheKey = normalizeQuery(message);
-
-            // キャッシュサイズ制限チェック
-            if (messageCache.size >= MAX_CACHE_SIZE) {
-              // 最も古いエントリを削除（単純実装）
-              const oldestKey = messageCache.keys().next().value;
-              console.log("🔄 キャッシュ容量制限到達、削除:", oldestKey);
-              messageCache.delete(oldestKey as string);
-            }
-
-            // キャッシュに保存（型安全なオブジェクトを使用）
-            messageCache.set(cacheKey, safeResponseData);
-            console.log("🔄 キャッシュに保存:", cacheKey);
-
-            // 定義済みの型安全なTTL処理関数を呼び出す
-            setTTLForCacheEntry(cacheKey);
-          } catch (cacheError) {
-            console.error("🔄 キャッシュ保存エラー:", cacheError);
-            // キャッシュエラーは無視
-          }
+    // テキスト応答をそのまま使用
+    const textValue = content.text.value || "";
+    console.log(`応答内容: ${textValue.substring(0, 200)}...`); // 最初の200文字をログ出力
+    
+    // 自由チャット用のレスポンスを構築
+    const response: FreeChatResponse = {
+      question: message,
+      answer: textValue
+    };
+    
+    // キャッシュに応答を保存
+    if (CACHE_ENABLED) {
+      try {
+        const cacheKey = normalizeQuery(message);
+        
+        // キャッシュサイズ制限チェック
+        if (messageCache.size >= MAX_CACHE_SIZE) {
+          // 最も古いエントリを削除（単純実装）
+          const oldestKey = messageCache.keys().next().value;
+          console.log("🔄 キャッシュ容量制限到達、削除:", oldestKey);
+          messageCache.delete(oldestKey as string);
         }
-
-        return {
-          success: true,
-          data: safeResponseData, // 型安全なオブジェクトを返す
-        };
-      } else {
-        return {
-          success: true,
-          data: {
-            question: message,
-            answer: [], // 空のProduct配列
-          },
-        };
+        
+        // キャッシュに保存
+        messageCache.set(cacheKey, response);
+        console.log("🔄 キャッシュに保存:", cacheKey);
+        
+        // TTL処理関数を呼び出す
+        setTTLForCacheEntry(cacheKey);
+      } catch (cacheError) {
+        console.error("🔄 キャッシュ保存エラー:", cacheError);
+        // キャッシュエラーは無視
       }
-    } catch (e) {
-      console.error("JSON解析エラー:", e);
-      return {
-        success: false,
-        error: "データの形式が不正です",
-      };
     }
+    
+    return {
+      success: true,
+      data: response
+    };
   } catch (error) {
     console.error("エラー:", error);
     return {
