@@ -48,6 +48,11 @@ export function MessageList({ messages, isLoading, resultData }: MessageListProp
                   const jsonStr = jsonMatch[1] || jsonMatch[0];
                   const parsedData = JSON.parse(jsonStr);
                   
+                  // データ検証
+                  if (parsedData === null || typeof parsedData !== 'object') {
+                    throw new Error('無効なJSONデータです');
+                  }
+                  
                   // これをチャットUIのメインコンテンツに直接表示
                   return (
                     <div key={message.id} className="w-full my-6">

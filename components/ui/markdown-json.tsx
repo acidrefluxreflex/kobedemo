@@ -20,7 +20,7 @@ export function MarkdownJson({ data, className }: MarkdownJsonProps) {
   console.log(data);
   const products = data.recommended_products as Product[] | undefined;
   console.log(products);
-  if (products) {
+  if (products && Array.isArray(products)) {
     return (
       <div className="space-y-6">
         <Card>
@@ -58,14 +58,14 @@ export function MarkdownJson({ data, className }: MarkdownJsonProps) {
                 <div className="mb-3">
                   <div className="text-xs uppercase text-slate-500 font-semibold mb-1">使用例</div>
                   <ul className="list-disc list-inside text-sm">
-                    {product.examples.map((example, index) => (
+                    {Array.isArray(product.examples) && product.examples.map((example, index) => (
                       <li key={index}>{example}</li>
                     ))}
                   </ul>
                 </div>
                 
                 {/* マーケティング情報 */}
-                {product.marketing_materials.length > 0 && (
+                {Array.isArray(product.marketing_materials) && product.marketing_materials.length > 0 && (
                   <div className="mt-4 border-t pt-3">
                     <div className="text-xs uppercase text-slate-500 font-semibold mb-1">セールスポイント</div>
                     {product.marketing_materials.map((material, index) => (
