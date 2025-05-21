@@ -2,6 +2,12 @@ import type { SidebarItem } from "@/types"
 
 export const sidebarItems: SidebarItem[] = [
   {
+    id: "resources",
+    label: "リソース管理",
+    icon: "resources",
+    href: "/resource-management",
+  },
+  {
     id: "templates",
     label: "テンプレート管理",
     icon: "template",

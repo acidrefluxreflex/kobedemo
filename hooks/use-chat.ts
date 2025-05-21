@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react';
-import { sendMessage as sendMessageAction, getMessageHistory, deleteThread } from '@/app/actions/chat';
+import { useState, useCallback } from 'react';
+import { sendMessage as sendMessageAction, deleteThread } from '@/app/actions/chat';
 import { ChatState, Message, ApiResponse } from '@/types/chat';
 import { ProductQuestion } from '@/types/products';
 
@@ -13,39 +13,15 @@ export function useChat() {
     resultData: null
   });
   
-  // 初期化（メッセージ履歴読み込み）
-  const initChat = useCallback(async () => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
-    
-    try {
-      const response = await getMessageHistory();
-      
-      if (response.success) {
-        setState(prev => ({
-          ...prev,
-          messages: response.data || [],
-          isLoading: false
-        }));
-      } else {
-        setState(prev => ({
-          ...prev,
-          error: response.error || '履歴の読み込みに失敗しました',
-          isLoading: false
-        }));
-      }
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        error: '履歴の読み込みに失敗しました',
-        isLoading: false
-      }));
-    }
+  // 初期化（空の状態にリセット）
+  const initChat = useCallback(() => {
+    setState({
+      messages: [],
+      isLoading: false,
+      error: null,
+      resultData: null
+    });
   }, []);
-  
-  // 初回ロード時に履歴を取得
-  useEffect(() => {
-    initChat();
-  }, [initChat]);
   
   // メッセージ送信
   const sendMessage = useCallback(async (content: string) => {
@@ -53,17 +29,16 @@ export function useChat() {
     
     // UIにユーザーメッセージを即時反映
     const tempId = `temp-${Date.now()}`;
+    const userMessage: Message = {
+      id: tempId,
+      role: 'user',
+      content,
+      createdAt: new Date()
+    };
+    
     setState(prev => ({
       ...prev,
-      messages: [
-        ...prev.messages,
-        {
-          id: tempId,
-          role: 'user',
-          content,
-          createdAt: new Date()
-        }
-      ],
+      messages: [...prev.messages, userMessage],
       isLoading: true,
       error: null
     }));
@@ -72,23 +47,20 @@ export function useChat() {
       const response = await sendMessageAction(content);
       
       if (response.success) {
-        // 履歴を再取得して最新状態に
-        const historyResponse = await getMessageHistory();
+        // 応答メッセージをローカル状態に追加
+        const assistantMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: JSON.stringify(response.data),
+          createdAt: new Date()
+        };
         
-        if (historyResponse.success) {
-          setState(prev => ({
-            ...prev,
-            messages: historyResponse.data || prev.messages,
-            resultData: response.data as ProductQuestion,
-            isLoading: false
-          }));
-        } else {
-          setState(prev => ({
-            ...prev,
-            error: historyResponse.error || 'メッセージ履歴の更新に失敗しました',
-            isLoading: false
-          }));
-        }
+        setState(prev => ({
+          ...prev,
+          messages: [...prev.messages, assistantMessage],
+          resultData: response.data as ProductQuestion,
+          isLoading: false
+        }));
         
         return response.data as ProductQuestion;
       } else {
@@ -114,22 +86,15 @@ export function useChat() {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
-      const response = await deleteThread();
+      await deleteThread();
       
-      if (response.success) {
-        setState({
-          messages: [],
-          isLoading: false,
-          error: null,
-          resultData: null
-        });
-      } else {
-        setState(prev => ({
-          ...prev,
-          error: response.error || '新規チャットの開始に失敗しました',
-          isLoading: false
-        }));
-      }
+      // ローカル状態をリセット
+      setState({
+        messages: [],
+        isLoading: false,
+        error: null,
+        resultData: null
+      });
     } catch (error) {
       setState(prev => ({
         ...prev,

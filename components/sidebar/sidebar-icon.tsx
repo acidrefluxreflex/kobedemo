@@ -1,4 +1,4 @@
-import { FileText, Users, BarChart2, Book, Database, Sliders } from "lucide-react"
+import { FileText, Users, BarChart2, Book, Database, Sliders, Files } from "lucide-react"
 
 interface SidebarIconProps {
   name: string
@@ -19,6 +19,8 @@ export function SidebarIcon({ name, className = "h-5 w-5 text-gray-500" }: Sideb
       return <BarChart2 className={className} />
     case "settings":
       return <Sliders className={className} />
+    case "resources":
+      return <Files className={className} />
     default:
       return <FileText className={className} />
   }
