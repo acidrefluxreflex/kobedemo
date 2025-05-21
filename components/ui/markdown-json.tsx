@@ -69,11 +69,8 @@ export function MarkdownJson({ data, className }: MarkdownJsonProps) {
                   <div className="text-xs uppercase text-slate-500 font-semibold mb-1">価格</div>
                   {product.pricing_and_sales && product.pricing_and_sales.price ? (
                     <ul className="list-disc list-inside text-sm">
-                      {Object.entries(product.pricing_and_sales.price).map(([priceType, priceValue], index) => (
-                        <li key={index}>
-                          <span className="font-medium">{priceType}:</span> {priceValue}
-                        </li>
-                      ))}
+                      <p>販売価格/kg</p>
+                     <p>{producing_and_sales.price.annual_sales_volume_kt.pricing_and_sales.price.annual_sales_volume_kg}</p>
                     </ul>
                   ) : (
                     <p className="text-sm text-slate-500">価格情報はありません</p>
