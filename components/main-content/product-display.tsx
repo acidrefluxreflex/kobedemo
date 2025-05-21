@@ -225,9 +225,7 @@ export function ProductDisplay({ data }: ProductDisplayProps) {
                           <div className="font-semibold text-sm text-green-800">
                             年間販売量
                           </div>
-                          <div className="text-lg font-bold text-green-900">
-                            {product.pricing_and_sales.annual_sales_volume_kg.toLocaleString()} kg
-                          </div>
+                        
                         </div>
                       </div>
                     </div>

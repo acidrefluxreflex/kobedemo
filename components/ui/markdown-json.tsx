@@ -52,16 +52,7 @@ export function MarkdownJson({ data, className }: MarkdownJsonProps) {
                   <p className="text-sm">{product.features}</p>
                 </div>
                 
-                {/* 価格情報 */}
-                <div className="mb-3 bg-slate-50 p-3 rounded-md">
-                  <div className="text-xs uppercase text-slate-500 font-semibold mb-1">価格情報</div>
-                  
-                 
-                  
-                  <div className="text-xs text-slate-500 mt-1">
-                    年間販売量: {product.pricing_and_sales.annual_sales_volume_kg.toLocaleString()}kg
-                  </div>
-                </div>
+               
                 
                 {/* 使用例 */}
                 <div className="mb-3">
