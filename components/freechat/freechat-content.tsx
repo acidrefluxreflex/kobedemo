@@ -25,7 +25,7 @@ function FreeChatMessageList({ messages, isLoading }: {
               message.role === 'user'
                 ? 'bg-blue-500 text-white'
                 : 'bg-gray-100'
-            }`}
+            } whitespace-pre-wrap`}
           >
             {message.content}
           </div>
